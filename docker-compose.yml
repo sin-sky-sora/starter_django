@@ -1,0 +1,31 @@
+version: "3"
+
+volumes:
+  gunifol:
+    driver: local
+
+services:
+  app:
+    build: django/
+    #ports:
+    # - "8000:8000"
+    volumes:
+     - "./django/dp/:/django/"
+     - "gunifol:/var/run/gunicorn"
+    #command: python dp/manage.py runserver 0.0.0.0:8000
+    tty: true
+    stdin_open: true
+
+  web:
+    image: nginx:1.19.8-alpine
+    ports:
+     - "80:80"
+    volumes:
+     - "./gunicorn/gunicorn.conf:/etc/nginx/conf.d/default.conf"
+     - "gunifol:/var/run/gunicorn"
+    depends_on:
+     - app
+    links:
+     - app
+    tty: true
+    stdin_open: true
